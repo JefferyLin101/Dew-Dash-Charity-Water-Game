@@ -1,0 +1,117 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover" />
+  <meta name="theme-color" content="#15130f" />
+  <title>Dew Dash</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Montserrat:ital,wght@0,700;0,800;0,900;1,800;1,900&family=Nunito+Sans:wght@400;600;700;800&display=swap" />
+  <link rel="stylesheet" href="style.css" />
+</head>
+<body>
+  <main id="game" class="game" data-mode="home">
+    <!-- The whole street scene (road, buildings, droplet, pickups) is drawn on this canvas -->
+    <canvas id="scene" aria-hidden="true"></canvas>
+
+    <!-- ========== HOME SCREEN ========== -->
+    <section id="homeScreen" class="screen home" aria-label="Home">
+      <header class="home-top">
+        <p class="eyebrow">A run for clean water</p>
+        <h1 class="title">Dew Dash</h1>
+        <dl class="stats">
+          <div class="stat stat--progress">
+            <dt>Current Progress</dt>
+            <dd id="statProgress">0</dd>
+          </div>
+          <div class="stat stat--high">
+            <dt>High Score</dt>
+            <dd id="statHigh">0</dd>
+          </div>
+          <div class="stat stat--last">
+            <dt>Last Score</dt>
+            <dd id="statLast">0</dd>
+          </div>
+        </dl>
+      </header>
+
+      <!-- Donate link. charity: water's brand book only allows official partners to use their
+           logo, so this uses a plain drop icon. Swap in the logo here if your class allows it. -->
+      <a class="give" href="https://www.charitywater.org/donate" target="_blank" rel="noopener"
+         aria-label="Give to charity: water (opens their website)">
+        <span class="give-icon" aria-hidden="true">
+          <svg viewBox="0 0 24 24" width="26" height="26">
+            <path d="M12 2.6C12 2.6 5.2 10.1 5.2 14.6a6.8 6.8 0 0 0 13.6 0C18.8 10.1 12 2.6 12 2.6Z" fill="currentColor" />
+            <path d="M9.4 14.8a2.7 2.7 0 0 0 2.6 2.6" stroke="#15130f" stroke-width="1.6" fill="none" stroke-linecap="round" />
+          </svg>
+        </span>
+        <span class="give-label">Give</span>
+      </a>
+
+      <!-- Invisible button sitting on top of the droplet drawn on the canvas -->
+      <button id="avatarBtn" class="avatar-hit" type="button" aria-label="Tap the droplet for a water fact"></button>
+      <div id="factBubble" class="fact-bubble" role="status" aria-live="polite" hidden>
+        <p id="factText" class="fact-text"></p>
+        <p id="factSource" class="fact-source"></p>
+      </div>
+
+      <div class="home-bottom">
+        <button id="startBtn" class="btn btn--primary btn--start" type="button">Start Run</button>
+        <p class="fine-print">Fan-made game. Not affiliated with charity: water.</p>
+      </div>
+    </section>
+
+    <!-- ========== GAME HUD ========== -->
+    <div id="hud" class="hud" hidden>
+      <span class="hud-spacer" aria-hidden="true"></span>
+      <div class="hud-stats">
+        <div id="hudWater" class="hud-stat hud-stat--water">
+          <span class="hud-label">Water Size</span>
+          <span id="waterSize" class="hud-value">0</span>
+        </div>
+        <div id="hudScore" class="hud-stat hud-stat--score">
+          <span class="hud-label">Total Score</span>
+          <span id="totalScore" class="hud-value">0</span>
+        </div>
+      </div>
+      <button id="pauseBtn" class="icon-btn" type="button" aria-label="Pause">
+        <svg viewBox="0 0 24 24" width="20" height="20" aria-hidden="true">
+          <rect x="6" y="5" width="4" height="14" rx="1" fill="currentColor" />
+          <rect x="14" y="5" width="4" height="14" rx="1" fill="currentColor" />
+        </svg>
+      </button>
+    </div>
+    <p id="hint" class="hint" hidden></p>
+
+    <!-- ========== PAUSE ========== -->
+    <section id="pauseScreen" class="screen pause" aria-label="Paused" hidden>
+      <div class="card pause-card">
+        <h2 class="card-title">Paused</h2>
+        <p class="card-note">Water you've stored in buckets still counts if you head home.</p>
+        <div class="btn-row">
+          <button id="quitBtn" class="btn btn--dark" type="button">Home</button>
+          <button id="resumeBtn" class="btn btn--primary" type="button">Resume</button>
+        </div>
+      </div>
+    </section>
+
+    <!-- ========== GAME OVER ========== -->
+    <section id="gameOverScreen" class="screen over" aria-label="Game over" hidden>
+      <div class="card over-card">
+        <h2 class="over-title">Game Over</h2>
+        <p class="over-label">Total Score</p>
+        <p id="overScore" class="over-score">0</p>
+        <p id="overBest" class="badge" hidden>New high score!</p>
+        <p id="overNote" class="over-note"></p>
+      </div>
+      <div class="btn-row over-actions">
+        <button id="homeBtn" class="btn btn--dark" type="button">Home</button>
+        <button id="retryBtn" class="btn btn--primary" type="button">Try Again</button>
+      </div>
+    </section>
+  </main>
+
+  <script src="script.js"></script>
+</body>
+</html>

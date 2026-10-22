@@ -1,0 +1,629 @@
+/* =========================================================
+   Dew Dash — styles
+   Layout: the canvas fills the screen; every screen (home,
+   HUD, pause, game over) floats on top as black-and-yellow
+   "street signage" in charity: water's brand colors.
+   ========================================================= */
+
+:root {
+  /* charity: water brand colors (2016 brand book) */
+  --cw-yellow: #ffc907;
+  --cw-blue: #2e9df7;
+
+  /* UI neutrals, warmed slightly toward the yellow */
+  --ink: #15130f;
+  --ink-soft: #2a2620;
+  --cream: #fff8e7;
+  --muted: #cfc5ae;
+  --water-text: #8fd0ff;
+
+  /* Proxima Nova is the brand font; Montserrat and Nunito Sans are free stand-ins */
+  --font-display: "Proxima Nova", "Montserrat", "Avenir Next", Avenir, system-ui, sans-serif;
+  --font-body: "Nunito Sans", "Avenir Next", Avenir, system-ui, sans-serif;
+
+  --gutter-l: max(16px, env(safe-area-inset-left, 0px));
+  --gutter-r: max(16px, env(safe-area-inset-right, 0px));
+  --safe-t: env(safe-area-inset-top, 0px);
+  --safe-b: env(safe-area-inset-bottom, 0px);
+
+  color-scheme: dark;
+}
+
+*,
+*::before,
+*::after {
+  box-sizing: border-box;
+}
+
+[hidden] {
+  display: none !important;
+}
+
+html,
+body {
+  height: 100%;
+  margin: 0;
+  background: var(--ink);
+  color: var(--cream);
+  font-family: var(--font-body);
+  overflow: hidden;
+}
+
+/* ---------- Game container + canvas ---------- */
+
+.game {
+  position: fixed;
+  inset: 0;
+  overflow: hidden;
+  background: var(--ink);
+  touch-action: none;              /* swipes control the droplet instead of scrolling */
+  user-select: none;
+  -webkit-user-select: none;
+  -webkit-tap-highlight-color: transparent;
+}
+
+#scene {
+  position: absolute;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+  display: block;
+  transition: filter 0.6s ease;
+}
+
+.game.is-gray #scene {
+  filter: grayscale(1) brightness(0.6);
+}
+
+/* Every overlay screen shares this frame */
+.screen {
+  position: absolute;
+  inset: 0;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  padding-block: calc(var(--safe-t) + 16px) calc(var(--safe-b) + 20px);
+  padding-left: var(--gutter-l);
+  padding-right: var(--gutter-r);
+  pointer-events: none;            /* only the controls inside catch taps */
+}
+
+.screen a,
+.screen button,
+.screen .card {
+  pointer-events: auto;
+}
+
+/* ---------- Buttons ---------- */
+
+.btn {
+  font: 900 1.05rem/1 var(--font-display);
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+  min-height: 52px;
+  padding: 16px 26px;
+  border-radius: 14px;
+  border: 3px solid var(--ink);
+  cursor: pointer;
+  transition: transform 0.08s ease, box-shadow 0.08s ease;
+}
+
+.btn--primary {
+  background: var(--cw-yellow);
+  color: var(--ink);
+  box-shadow: 0 5px 0 var(--ink);
+}
+
+.btn--dark {
+  background: var(--ink);
+  color: var(--cw-yellow);
+  border-color: var(--cw-yellow);
+  box-shadow: 0 5px 0 rgba(0, 0, 0, 0.55);
+}
+
+.btn:hover {
+  transform: translateY(-1px);
+}
+
+.btn:active {
+  transform: translateY(3px);
+  box-shadow: 0 2px 0 var(--ink);
+}
+
+.btn:focus-visible,
+.icon-btn:focus-visible,
+.give:focus-visible .give-icon,
+.avatar-hit:focus-visible {
+  outline: 3px solid var(--cream);
+  outline-offset: 3px;
+}
+
+.give:focus-visible {
+  outline: none;
+}
+
+.btn-row {
+  display: flex;
+  gap: 12px;
+  width: 100%;
+}
+
+.btn-row .btn {
+  flex: 1;
+}
+
+/* ---------- Home screen ---------- */
+
+.home-top {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 10px;
+  transition: opacity 0.35s ease, transform 0.35s ease;
+}
+
+.eyebrow {
+  margin: 0;
+  padding: 5px 12px;
+  border-radius: 999px;
+  background: var(--ink);
+  color: var(--cream);
+  font: 800 0.7rem/1 var(--font-display);
+  text-transform: uppercase;
+  letter-spacing: 0.14em;
+}
+
+.title {
+  margin: 0;
+  padding: 0.14em 0.42em 0.2em;
+  border-radius: 14px;
+  background: var(--ink);
+  color: var(--cw-yellow);
+  font: italic 900 clamp(2.6rem, 10vw, 4.6rem)/0.95 var(--font-display);
+  letter-spacing: -0.02em;
+  text-transform: uppercase;
+  box-shadow: 0 6px 0 var(--cw-yellow);
+}
+
+.stats {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 7px;
+  margin: 8px 0 0;
+}
+
+.stat {
+  display: flex;
+  align-items: baseline;
+  justify-content: space-between;
+  gap: 16px;
+  padding: 7px 16px;
+  border-radius: 999px;
+  background: var(--ink);
+  border: 2px solid var(--cw-yellow);
+}
+
+.stat--progress { min-width: 250px; }
+.stat--high { min-width: 214px; }
+.stat--last { min-width: 184px; }
+
+.stat dt {
+  font: 800 0.68rem/1 var(--font-display);
+  text-transform: uppercase;
+  letter-spacing: 0.1em;
+  color: var(--cw-yellow);
+}
+
+.stat dd {
+  margin: 0;
+  font: 900 1.12rem/1 var(--font-display);
+  color: var(--cream);
+  font-variant-numeric: tabular-nums;
+}
+
+.give {
+  position: absolute;
+  left: var(--gutter-l);
+  top: 47%;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 5px;
+  text-decoration: none;
+  transition: opacity 0.3s ease;
+}
+
+.give-icon {
+  display: grid;
+  place-items: center;
+  width: 56px;
+  height: 56px;
+  border-radius: 50%;
+  background: var(--ink);
+  border: 3px solid var(--cw-yellow);
+  color: var(--cw-yellow);
+  transition: transform 0.15s ease;
+}
+
+.give:hover .give-icon {
+  transform: scale(1.07);
+}
+
+.give-label {
+  padding: 4px 10px;
+  border-radius: 999px;
+  background: var(--ink);
+  color: var(--cw-yellow);
+  font: 900 0.68rem/1 var(--font-display);
+  text-transform: uppercase;
+  letter-spacing: 0.12em;
+}
+
+/* Positioned by script.js over the droplet drawn on the canvas */
+.avatar-hit {
+  position: absolute;
+  left: calc(var(--avatar-x, 50%) - var(--avatar-w, 100px) / 2);
+  top: var(--avatar-top, 55%);
+  width: var(--avatar-w, 100px);
+  height: var(--avatar-h, 120px);
+  padding: 0;
+  border: 0;
+  border-radius: 40%;
+  background: transparent;
+  cursor: pointer;
+}
+
+.fact-bubble {
+  position: absolute;
+  left: var(--avatar-x, 50%);
+  bottom: var(--bubble-bottom, 50%);
+  transform: translateX(-50%);
+  width: min(300px, calc(100% - 32px));
+  padding: 12px 14px 10px;
+  border-radius: 16px;
+  background: var(--cream);
+  color: var(--ink);
+  border: 3px solid var(--ink);
+  box-shadow: 0 4px 0 var(--ink);
+  pointer-events: auto;
+}
+
+.fact-bubble::after {
+  content: "";
+  position: absolute;
+  left: 50%;
+  bottom: -12px;
+  width: 18px;
+  height: 18px;
+  background: var(--cream);
+  border-right: 3px solid var(--ink);
+  border-bottom: 3px solid var(--ink);
+  transform: translateX(-50%) rotate(45deg);
+}
+
+.fact-bubble.pop {
+  animation: bubble-pop 0.3s cubic-bezier(0.2, 1.5, 0.4, 1);
+}
+
+.fact-text {
+  margin: 0;
+  font: 700 0.92rem/1.38 var(--font-body);
+  text-wrap: pretty;
+}
+
+.fact-source {
+  margin: 6px 0 0;
+  font: 700 0.68rem/1.2 var(--font-body);
+  letter-spacing: 0.04em;
+  color: #6b6252;
+}
+
+.home-bottom {
+  margin-top: auto;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 10px;
+  transition: opacity 0.35s ease, transform 0.35s ease;
+}
+
+.btn--start {
+  min-width: 230px;
+  font-size: 1.2rem;
+}
+
+.fine-print {
+  margin: 0;
+  font: 600 0.72rem/1.3 var(--font-body);
+  color: var(--muted);
+  text-align: center;
+}
+
+/* Start Run pressed: UI clears out while the droplet turns around */
+.home.is-leaving .home-top {
+  opacity: 0;
+  transform: translateY(-30px);
+}
+
+.home.is-leaving .home-bottom {
+  opacity: 0;
+  transform: translateY(30px);
+}
+
+.home.is-leaving .give,
+.home.is-leaving .fact-bubble {
+  opacity: 0;
+}
+
+/* ---------- HUD ---------- */
+
+.hud {
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  display: grid;
+  grid-template-columns: 44px minmax(0, 1fr) 44px;
+  align-items: start;
+  gap: 8px;
+  padding-top: calc(var(--safe-t) + 12px);
+  padding-left: var(--gutter-l);
+  padding-right: var(--gutter-r);
+  pointer-events: none;
+  animation: fade-in 0.35s ease both;
+}
+
+.hud-stats {
+  display: flex;
+  justify-content: center;
+  gap: 8px;
+  min-width: 0;
+}
+
+.hud-stat {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 2px;
+  min-width: 0;
+  flex: 0 1 132px;
+  padding: 7px 10px 8px;
+  border-radius: 12px;
+  background: var(--ink);
+  border: 2px solid var(--cw-yellow);
+}
+
+.hud-label {
+  font: 800 0.6rem/1 var(--font-display);
+  text-transform: uppercase;
+  letter-spacing: 0.1em;
+  color: var(--cw-yellow);
+  white-space: nowrap;
+}
+
+.hud-value {
+  font: 900 1.45rem/1.05 var(--font-display);
+  font-variant-numeric: tabular-nums;
+  color: var(--cream);
+}
+
+.hud-stat--water .hud-value {
+  color: var(--water-text);
+}
+
+.hud-stat.pulse {
+  animation: hud-pulse 0.3s ease-out;
+}
+
+.icon-btn {
+  grid-column: 3;
+  display: grid;
+  place-items: center;
+  width: 44px;
+  height: 44px;
+  padding: 0;
+  border-radius: 12px;
+  background: var(--ink);
+  border: 2px solid var(--cw-yellow);
+  color: var(--cw-yellow);
+  cursor: pointer;
+  pointer-events: auto;
+}
+
+.hint {
+  position: absolute;
+  left: 50%;
+  bottom: calc(var(--safe-b) + 24px);
+  transform: translateX(-50%);
+  width: max-content;
+  max-width: calc(100% - 32px);
+  margin: 0;
+  padding: 10px 16px;
+  border-radius: 12px;
+  background: rgba(21, 19, 15, 0.9);
+  border: 2px solid var(--cw-yellow);
+  color: var(--cream);
+  font: 700 0.88rem/1.4 var(--font-body);
+  text-align: center;
+  text-wrap: balance;
+  pointer-events: none;
+  transition: opacity 0.5s ease;
+}
+
+.hint.is-fading {
+  opacity: 0;
+}
+
+.hint kbd {
+  display: inline-block;
+  min-width: 1.6em;
+  padding: 1px 5px;
+  border-radius: 5px;
+  background: var(--cw-yellow);
+  color: var(--ink);
+  font: 900 0.78rem/1.4 var(--font-display);
+}
+
+/* ---------- Cards (pause + game over) ---------- */
+
+.card {
+  width: min(360px, 100%);
+  padding: 18px 22px 20px;
+  border-radius: 18px;
+  background: var(--ink);
+  border: 3px solid var(--cw-yellow);
+  box-shadow: 0 6px 0 rgba(0, 0, 0, 0.5);
+  text-align: center;
+  animation: drop-in 0.45s cubic-bezier(0.2, 1.3, 0.4, 1) both;
+}
+
+.pause {
+  justify-content: center;
+  background: rgba(21, 19, 15, 0.45);
+  pointer-events: auto;
+}
+
+.card-title {
+  margin: 0 0 6px;
+  font: italic 900 2.2rem/1 var(--font-display);
+  text-transform: uppercase;
+  color: var(--cw-yellow);
+}
+
+.card-note {
+  margin: 0 0 16px;
+  font: 600 0.9rem/1.4 var(--font-body);
+  color: var(--muted);
+}
+
+.over {
+  justify-content: space-between;
+}
+
+.over-title {
+  margin: 0 0 12px;
+  font: italic 900 clamp(2.2rem, 9vw, 2.9rem)/1 var(--font-display);
+  text-transform: uppercase;
+  color: var(--cw-yellow);
+}
+
+.over-label {
+  margin: 0;
+  font: 800 0.7rem/1 var(--font-display);
+  text-transform: uppercase;
+  letter-spacing: 0.12em;
+  color: var(--cw-yellow);
+}
+
+.over-score {
+  margin: 4px 0 0;
+  font: 900 3.2rem/1 var(--font-display);
+  font-variant-numeric: tabular-nums;
+  color: var(--cream);
+}
+
+.badge {
+  display: inline-block;
+  margin: 10px 0 0;
+  padding: 5px 12px;
+  border-radius: 999px;
+  background: var(--cw-yellow);
+  color: var(--ink);
+  font: 900 0.72rem/1 var(--font-display);
+  text-transform: uppercase;
+  letter-spacing: 0.1em;
+}
+
+.over-note {
+  margin: 12px 0 0;
+  font: 600 0.9rem/1.4 var(--font-body);
+  color: var(--muted);
+  text-wrap: balance;
+}
+
+.over-actions {
+  width: min(420px, 100%);
+  animation: rise-in 0.45s 0.1s ease both;
+}
+
+/* ---------- Animations ---------- */
+
+@keyframes hud-pulse {
+  0% { transform: scale(1); }
+  40% { transform: scale(1.08); }
+  100% { transform: scale(1); }
+}
+
+@keyframes bubble-pop {
+  from { transform: translateX(-50%) scale(0.7); opacity: 0; }
+  to { transform: translateX(-50%) scale(1); opacity: 1; }
+}
+
+@keyframes drop-in {
+  from { transform: translateY(-40px); opacity: 0; }
+  to { transform: translateY(0); opacity: 1; }
+}
+
+@keyframes rise-in {
+  from { transform: translateY(30px); opacity: 0; }
+  to { transform: translateY(0); opacity: 1; }
+}
+
+@keyframes fade-in {
+  from { opacity: 0; }
+  to { opacity: 1; }
+}
+
+/* ---------- Size adjustments ---------- */
+
+/* Bigger screens: roomier signage */
+@media (min-width: 900px) and (min-height: 700px) {
+  .stat { padding: 9px 20px; }
+  .stat dd { font-size: 1.3rem; }
+  .stat--progress { min-width: 300px; }
+  .stat--high { min-width: 260px; }
+  .stat--last { min-width: 224px; }
+  .hud-stat { flex-basis: 160px; }
+  .hud-value { font-size: 1.75rem; }
+  .give { left: max(32px, 8vw); }
+}
+
+/* Short screens (phones held sideways): put the stats in a row */
+@media (max-height: 560px) {
+  .home-top { gap: 6px; }
+  .eyebrow { display: none; }
+  .title { font-size: 2.2rem; box-shadow: 0 4px 0 var(--cw-yellow); }
+  .stats { flex-direction: row; flex-wrap: wrap; justify-content: center; margin-top: 4px; }
+  .stat--progress,
+  .stat--high,
+  .stat--last { min-width: 0; padding: 5px 12px; }
+  .btn--start { min-height: 44px; padding: 12px 22px; }
+  .fine-print { display: none; }
+  .over-score { font-size: 2.4rem; }
+  .card { padding: 12px 18px 14px; }
+}
+
+/* Phones: the fact bubble needs the space the Give button sits in */
+@media (max-width: 700px) {
+  .home.has-fact .give {
+    opacity: 0;
+    pointer-events: none;
+  }
+}
+
+/* Very narrow phones */
+@media (max-width: 360px) {
+  .stat--progress { min-width: 230px; }
+  .hud-value { font-size: 1.25rem; }
+  .give { top: 50%; }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  *,
+  *::before,
+  *::after {
+    animation-duration: 0.01ms !important;
+    transition-duration: 0.01ms !important;
+  }
+}
