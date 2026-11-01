@@ -5,9 +5,18 @@
   <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover" />
   <meta name="theme-color" content="#15130f" />
   <title>Dew Dash</title>
+
+  <!-- FONT
+       charity: water's brand font is Proxima Nova. It's a paid font, available through Adobe Fonts.
+       If you have Adobe Fonts (many schools include it with Creative Cloud), add Proxima Nova to a
+       web project and paste the <link> tag Adobe gives you on the line below. It looks like:
+       <link rel="stylesheet" href="https://use.typekit.net/YOURKITID.css" />
+       Without it, Macs and iPhones use Avenir (the substitute charity: water's brand book allows),
+       and other devices use Montserrat, a free look-alike loaded from Google Fonts. -->
+
   <link rel="preconnect" href="https://fonts.googleapis.com" />
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
-  <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Montserrat:ital,wght@0,700;0,800;0,900;1,800;1,900&family=Nunito+Sans:wght@400;600;700;800&display=swap" />
+  <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Montserrat:ital,wght@0,400;0,600;0,700;0,800;0,900;1,800;1,900&display=swap" />
   <link rel="stylesheet" href="style.css" />
 </head>
 <body>
@@ -15,33 +24,79 @@
     <!-- The whole street scene (road, buildings, droplet, pickups) is drawn on this canvas -->
     <canvas id="scene" aria-hidden="true"></canvas>
 
+    <!-- RUBRIC: charity: water footer. Links to their site and donation page.
+         Shown on the home and game over screens, hidden during a run. -->
+    <footer id="cwFooter" class="cw-footer">
+      <div class="cw-footer-main">
+        <nav class="cw-links" aria-label="charity: water">
+          <a href="https://www.charitywater.org/" target="_blank" rel="noopener">Visit charitywater.org</a>
+          <a href="https://www.charitywater.org/donate" target="_blank" rel="noopener">Donate</a>
+          <a href="https://www.charitywater.org/our-work" target="_blank" rel="noopener">Our work</a>
+        </nav>
+      </div>
+      <button class="icon-btn sound-btn" type="button" aria-label="Sound" aria-pressed="true" title="Sound (M)">
+        <svg class="icon-sound-on" viewBox="0 0 24 24" width="20" height="20" aria-hidden="true">
+          <path d="M3.5 9h4l5-4v14l-5-4h-4z" fill="currentColor" />
+          <path d="M16 9a4 4 0 0 1 0 6M18.6 6.4a7.6 7.6 0 0 1 0 11.2" stroke="currentColor" stroke-width="2.2" fill="none" stroke-linecap="round" />
+        </svg>
+        <svg class="icon-sound-off" viewBox="0 0 24 24" width="20" height="20" aria-hidden="true">
+          <path d="M3.5 9h4l5-4v14l-5-4h-4z" fill="currentColor" />
+          <path d="M16 9.5l5 5M21 9.5l-5 5" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" />
+        </svg>
+      </button>
+    </footer>
+
     <!-- ========== HOME SCREEN ========== -->
     <section id="homeScreen" class="screen home" aria-label="Home">
       <header class="home-top">
         <p class="eyebrow">A run for clean water</p>
         <h1 class="title">Dew Dash</h1>
-        <dl class="stats">
-          <div class="stat stat--progress">
-            <dt>Current Progress</dt>
-            <dd id="statProgress">0</dd>
-          </div>
+
+        <div class="stats">
+          <!-- Tap to see every checkpoint -->
+          <button id="progressBtn" class="stat stat--progress" type="button" aria-haspopup="dialog">
+            <span class="stat-row">
+              <span class="stat-label">Current Progress</span>
+              <span id="statProgress" class="stat-value">0</span>
+            </span>
+            <span class="meter" aria-hidden="true"><span id="progressFill" class="meter-fill"></span></span>
+            <span class="stat-caption">
+              <span id="progressCaption">Dewdrop · 50 to Droplet</span>
+              <span class="stat-more" aria-hidden="true">Checkpoints ›</span>
+            </span>
+          </button>
           <div class="stat stat--high">
-            <dt>High Score</dt>
-            <dd id="statHigh">0</dd>
+            <span class="stat-label">High Score <span id="statHighTag" class="tag">Normal</span></span>
+            <span id="statHigh" class="stat-value">0</span>
           </div>
           <div class="stat stat--last">
-            <dt>Last Score</dt>
-            <dd id="statLast">0</dd>
+            <span class="stat-label">Last Score</span>
+            <span id="statLast" class="stat-value">0</span>
           </div>
-        </dl>
+        </div>
+
+        <!-- RUBRIC: Difficulty Modes. The rules for each level are in DIFFICULTIES in script.js -->
+        <fieldset class="difficulty">
+          <legend class="sr-only">Difficulty</legend>
+          <label class="diff-opt"><input type="radio" name="difficulty" id="diffEasy" value="easy" /><span>Easy</span></label>
+          <label class="diff-opt"><input type="radio" name="difficulty" id="diffNormal" value="normal" checked /><span>Normal</span></label>
+          <label class="diff-opt"><input type="radio" name="difficulty" id="diffHard" value="hard" /><span>Hard</span></label>
+        </fieldset>
+        <p id="difficultyNote" class="difficulty-note">Standard speed, obstacles, and buckets</p>
       </header>
 
-      <!-- Donate link. charity: water's brand book only allows official partners to use their
-           logo, so this uses a plain drop icon. Swap in the logo here if your class allows it. -->
-      <a class="give" href="https://www.charitywater.org/donate" target="_blank" rel="noopener"
+      <!-- Donate button with charity: water's official logo.
+           The logo loads from the download link on charity: water's media page
+           (charitywater.org/about/media). To keep a copy in your project instead, download
+           "vertical charity: water logo on black" (JPG), put it in an "images" folder,
+           and change src to "images/cw_vertical_black.jpg".
+           If the logo can't load, the button shows a plain water drop instead. -->
+      <a id="giveLink" class="give" href="https://www.charitywater.org/donate" target="_blank" rel="noopener"
          aria-label="Give to charity: water (opens their website)">
-        <span class="give-icon" aria-hidden="true">
-          <svg viewBox="0 0 24 24" width="26" height="26">
+        <span class="give-badge" aria-hidden="true">
+          <img id="giveLogo" class="give-logo" alt=""
+               src="https://d11sa1anfvm2xk.cloudfront.net/media/downloads/logos/cw_vertical_black.jpg" />
+          <svg class="give-fallback" viewBox="0 0 24 24" width="26" height="26">
             <path d="M12 2.6C12 2.6 5.2 10.1 5.2 14.6a6.8 6.8 0 0 0 13.6 0C18.8 10.1 12 2.6 12 2.6Z" fill="currentColor" />
             <path d="M9.4 14.8a2.7 2.7 0 0 0 2.6 2.6" stroke="#15130f" stroke-width="1.6" fill="none" stroke-linecap="round" />
           </svg>
@@ -58,13 +113,37 @@
 
       <div class="home-bottom">
         <button id="startBtn" class="btn btn--primary btn--start" type="button">Start Run</button>
-        <p class="fine-print">Fan-made game. Not affiliated with charity: water.</p>
+      </div>
+    </section>
+
+    <!-- ========== CHECKPOINTS PANEL ========== -->
+    <section id="checkpointScreen" class="screen sheet" hidden>
+      <div class="card sheet-card" role="dialog" aria-modal="true" aria-labelledby="cpTitle">
+        <div class="sheet-head">
+          <h2 id="cpTitle" class="card-title">Checkpoints</h2>
+          <button id="cpClose" class="icon-btn" type="button" aria-label="Close checkpoints">
+            <svg viewBox="0 0 24 24" width="20" height="20" aria-hidden="true">
+              <path d="M6 6l12 12M18 6L6 18" stroke="currentColor" stroke-width="3" stroke-linecap="round" />
+            </svg>
+          </button>
+        </div>
+        <p class="card-note">Store water in buckets to raise your Current Progress. Every checkpoint makes your droplet bigger and gives it a new look.</p>
+        <ol id="cpList" class="cp-list"></ol>
       </div>
     </section>
 
     <!-- ========== GAME HUD ========== -->
     <div id="hud" class="hud" hidden>
-      <span class="hud-spacer" aria-hidden="true"></span>
+      <button class="icon-btn sound-btn" type="button" aria-label="Sound" aria-pressed="true" title="Sound (M)">
+        <svg class="icon-sound-on" viewBox="0 0 24 24" width="20" height="20" aria-hidden="true">
+          <path d="M3.5 9h4l5-4v14l-5-4h-4z" fill="currentColor" />
+          <path d="M16 9a4 4 0 0 1 0 6M18.6 6.4a7.6 7.6 0 0 1 0 11.2" stroke="currentColor" stroke-width="2.2" fill="none" stroke-linecap="round" />
+        </svg>
+        <svg class="icon-sound-off" viewBox="0 0 24 24" width="20" height="20" aria-hidden="true">
+          <path d="M3.5 9h4l5-4v14l-5-4h-4z" fill="currentColor" />
+          <path d="M16 9.5l5 5M21 9.5l-5 5" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" />
+        </svg>
+      </button>
       <div class="hud-stats">
         <div id="hudWater" class="hud-stat hud-stat--water">
           <span class="hud-label">Water Size</span>
@@ -83,6 +162,8 @@
       </button>
     </div>
     <p id="hint" class="hint" hidden></p>
+    <!-- RUBRIC: Milestones. Messages pop in here during a run (see MILESTONES in script.js) -->
+    <p id="toast" class="toast" role="status" aria-live="polite" hidden></p>
 
     <!-- ========== PAUSE ========== -->
     <section id="pauseScreen" class="screen pause" aria-label="Paused" hidden>
@@ -100,10 +181,21 @@
     <section id="gameOverScreen" class="screen over" aria-label="Game over" hidden>
       <div class="card over-card">
         <h2 class="over-title">Game Over</h2>
-        <p class="over-label">Total Score</p>
+        <p class="over-label">Total Score <span id="overDiff" class="tag">Normal</span></p>
         <p id="overScore" class="over-score">0</p>
-        <p id="overBest" class="badge" hidden>New high score!</p>
+        <div id="overBadges" class="badges" hidden>
+          <p id="overBest" class="badge" hidden>New high score!</p>
+          <p id="overLevel" class="badge badge--level" hidden></p>
+        </div>
         <p id="overNote" class="over-note"></p>
+        <div class="over-progress">
+          <div class="stat-row">
+            <span class="stat-label">Current Progress</span>
+            <span id="overProgress" class="stat-value">0</span>
+          </div>
+          <span class="meter" aria-hidden="true"><span id="overFill" class="meter-fill"></span></span>
+          <span id="overCaption" class="stat-caption"></span>
+        </div>
       </div>
       <div class="btn-row over-actions">
         <button id="homeBtn" class="btn btn--dark" type="button">Home</button>

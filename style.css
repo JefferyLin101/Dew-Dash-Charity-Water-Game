@@ -1,8 +1,9 @@
 /* =========================================================
    Dew Dash — styles
    Layout: the canvas fills the screen; every screen (home,
-   HUD, pause, game over) floats on top as black-and-yellow
-   "street signage" in charity: water's brand colors.
+   HUD, pause, checkpoints, game over) floats on top as
+   black-and-yellow "street signage" in charity: water's
+   brand colors and brand font.
    ========================================================= */
 
 :root {
@@ -13,13 +14,16 @@
   /* UI neutrals, warmed slightly toward the yellow */
   --ink: #15130f;
   --ink-soft: #2a2620;
+  --line: #3a342a;
   --cream: #fff8e7;
   --muted: #cfc5ae;
   --water-text: #8fd0ff;
 
-  /* Proxima Nova is the brand font; Montserrat and Nunito Sans are free stand-ins */
-  --font-display: "Proxima Nova", "Montserrat", "Avenir Next", Avenir, system-ui, sans-serif;
-  --font-body: "Nunito Sans", "Avenir Next", Avenir, system-ui, sans-serif;
+  /* RUBRIC: Brand Font. Every piece of text in the game uses this one font stack.
+     charity: water's brand font is Proxima Nova ("proxima-nova" is its Adobe Fonts name).
+     Avenir is the substitute their brand book allows, and it comes with Macs and iPhones.
+     Montserrat is a free look-alike for every other device. */
+  --font-brand: "proxima-nova", "Proxima Nova", Avenir, "Avenir Next", Montserrat, system-ui, sans-serif;
 
   --gutter-l: max(16px, env(safe-area-inset-left, 0px));
   --gutter-r: max(16px, env(safe-area-inset-right, 0px));
@@ -45,8 +49,20 @@ body {
   margin: 0;
   background: var(--ink);
   color: var(--cream);
-  font-family: var(--font-body);
+  font-family: var(--font-brand);
   overflow: hidden;
+}
+
+.sr-only {
+  position: absolute;
+  width: 1px;
+  height: 1px;
+  padding: 0;
+  margin: -1px;
+  overflow: hidden;
+  clip: rect(0 0 0 0);
+  white-space: nowrap;
+  border: 0;
 }
 
 /* ---------- Game container + canvas ---------- */
@@ -90,14 +106,100 @@ body {
 
 .screen a,
 .screen button,
+.screen label,
+.screen input,
 .screen .card {
   pointer-events: auto;
+}
+
+/* Home and game over leave room for the footer (script.js measures its height) */
+.screen.home,
+.screen.over {
+  padding-bottom: calc(var(--footer-h, 64px) + 14px);
+}
+
+/* ---------- charity: water footer ---------- */
+
+.cw-footer {
+  position: absolute;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  padding-block: 8px calc(var(--safe-b) + 8px);
+  padding-left: var(--gutter-l);
+  padding-right: var(--gutter-r);
+  background: var(--ink);
+  border-top: 3px solid var(--cw-yellow);
+  opacity: 0;
+  visibility: hidden;
+  transition: opacity 0.3s ease, visibility 0s linear 0.3s;
+}
+
+.game[data-mode="home"] .cw-footer,
+.game[data-mode="over"] .cw-footer {
+  opacity: 1;
+  visibility: visible;
+  transition: opacity 0.3s ease;
+}
+
+.cw-footer-main {
+  display: flex;
+  flex: 1;
+  flex-wrap: wrap;
+  align-items: center;
+  justify-content: space-between;
+  gap: 4px 16px;
+  min-width: 0;
+}
+
+.cw-links {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 4px 16px;
+}
+
+.cw-links a {
+  color: var(--cw-yellow);
+  font: 800 0.8rem/1.4 var(--font-brand);
+  text-decoration: underline;
+  text-decoration-thickness: 2px;
+  text-underline-offset: 3px;
+}
+
+.cw-links a:hover {
+  color: #ffe066;
+}
+
+.cw-links a:focus-visible {
+  outline: 3px solid var(--cream);
+  outline-offset: 2px;
+  border-radius: 4px;
+}
+
+.cw-disclaimer {
+  margin: 0;
+  font: 600 0.7rem/1.3 var(--font-brand);
+  color: var(--muted);
+}
+
+/* Sound on/off button (footer and in-game HUD) */
+.sound-btn[aria-pressed="true"] .icon-sound-off,
+.sound-btn[aria-pressed="false"] .icon-sound-on {
+  display: none;
+}
+
+.sound-btn[aria-pressed="false"] {
+  color: var(--muted);
+  border-color: var(--muted);
 }
 
 /* ---------- Buttons ---------- */
 
 .btn {
-  font: 900 1.05rem/1 var(--font-display);
+  font: 900 1.05rem/1 var(--font-brand);
   text-transform: uppercase;
   letter-spacing: 0.05em;
   min-height: 52px;
@@ -132,7 +234,8 @@ body {
 
 .btn:focus-visible,
 .icon-btn:focus-visible,
-.give:focus-visible .give-icon,
+.stat--progress:focus-visible,
+.give:focus-visible .give-badge,
 .avatar-hit:focus-visible {
   outline: 3px solid var(--cream);
   outline-offset: 3px;
@@ -152,7 +255,41 @@ body {
   flex: 1;
 }
 
+.icon-btn {
+  display: grid;
+  place-items: center;
+  flex: none;
+  width: 44px;
+  height: 44px;
+  padding: 0;
+  border-radius: 12px;
+  background: var(--ink);
+  border: 2px solid var(--cw-yellow);
+  color: var(--cw-yellow);
+  cursor: pointer;
+  pointer-events: auto;
+}
+
+.tag {
+  display: inline-block;
+  padding: 2px 6px 3px;
+  border-radius: 6px;
+  background: var(--cw-yellow);
+  color: var(--ink);
+  font: 900 0.58rem/1.1 var(--font-brand);
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  vertical-align: 1px;
+}
+
 /* ---------- Home screen ---------- */
+
+/* Keep the home UI above the droplet's invisible tap target */
+.home-top,
+.home-bottom {
+  position: relative;
+  z-index: 1;
+}
 
 .home-top {
   display: flex;
@@ -168,7 +305,7 @@ body {
   border-radius: 999px;
   background: var(--ink);
   color: var(--cream);
-  font: 800 0.7rem/1 var(--font-display);
+  font: 800 0.7rem/1 var(--font-brand);
   text-transform: uppercase;
   letter-spacing: 0.14em;
 }
@@ -179,7 +316,7 @@ body {
   border-radius: 14px;
   background: var(--ink);
   color: var(--cw-yellow);
-  font: italic 900 clamp(2.6rem, 10vw, 4.6rem)/0.95 var(--font-display);
+  font: italic 900 clamp(2.6rem, 10vw, 4.6rem)/0.95 var(--font-brand);
   letter-spacing: -0.02em;
   text-transform: uppercase;
   box-shadow: 0 6px 0 var(--cw-yellow);
@@ -190,7 +327,7 @@ body {
   flex-direction: column;
   align-items: center;
   gap: 7px;
-  margin: 8px 0 0;
+  margin-top: 8px;
 }
 
 .stat {
@@ -202,30 +339,154 @@ body {
   border-radius: 999px;
   background: var(--ink);
   border: 2px solid var(--cw-yellow);
+  color: var(--cream);
 }
 
-.stat--progress { min-width: 250px; }
-.stat--high { min-width: 214px; }
-.stat--last { min-width: 184px; }
+.stat--high { min-width: 230px; }
+.stat--last { min-width: 190px; }
 
-.stat dt {
-  font: 800 0.68rem/1 var(--font-display);
+.stat-label {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  font: 800 0.68rem/1 var(--font-brand);
   text-transform: uppercase;
   letter-spacing: 0.1em;
   color: var(--cw-yellow);
 }
 
-.stat dd {
-  margin: 0;
-  font: 900 1.12rem/1 var(--font-display);
+.stat-value {
+  font: 900 1.12rem/1 var(--font-brand);
   color: var(--cream);
   font-variant-numeric: tabular-nums;
 }
 
+.stat-row {
+  display: flex;
+  align-items: baseline;
+  justify-content: space-between;
+  gap: 16px;
+}
+
+/* Current Progress: a bigger tile with a bar toward the next checkpoint */
+.stat--progress {
+  flex-direction: column;
+  align-items: stretch;
+  gap: 6px;
+  min-width: 280px;
+  padding: 9px 16px 8px;
+  border-radius: 16px;
+  font: inherit;
+  text-align: left;
+  cursor: pointer;
+  transition: border-color 0.15s ease, transform 0.15s ease;
+}
+
+.stat--progress:hover {
+  border-color: #ffe066;
+  transform: translateY(-1px);
+}
+
+.stat--progress:hover .stat-more {
+  text-decoration: underline;
+}
+
+.meter {
+  display: block;
+  height: 8px;
+  border-radius: 999px;
+  background: var(--line);
+  overflow: hidden;
+}
+
+.meter-fill {
+  display: block;
+  width: 0;
+  height: 100%;
+  border-radius: inherit;
+  background: linear-gradient(90deg, var(--cw-blue), #7cc6ff);
+  transition: width 0.9s cubic-bezier(0.2, 0.8, 0.2, 1);
+}
+
+.stat-caption {
+  display: flex;
+  justify-content: space-between;
+  gap: 12px;
+  font: 700 0.7rem/1.25 var(--font-brand);
+  color: var(--muted);
+}
+
+.stat-more {
+  color: var(--cw-yellow);
+  white-space: nowrap;
+}
+
+/* Difficulty picker: three radio buttons styled as one switch */
+.difficulty {
+  display: flex;
+  gap: 2px;
+  margin: 4px 0 0;
+  padding: 3px;
+  min-width: 0;
+  border: 2px solid var(--cw-yellow);
+  border-radius: 999px;
+  background: var(--ink);
+}
+
+.diff-opt {
+  position: relative;
+  cursor: pointer;
+}
+
+.diff-opt input {
+  position: absolute;
+  inset: 0;
+  margin: 0;
+  opacity: 0;
+  cursor: pointer;
+}
+
+.diff-opt span {
+  display: block;
+  padding: 11px 18px;
+  border-radius: 999px;
+  font: 900 0.78rem/1 var(--font-brand);
+  text-transform: uppercase;
+  letter-spacing: 0.08em;
+  color: var(--cream);
+  transition: background 0.15s ease, color 0.15s ease;
+}
+
+.diff-opt:hover input:not(:checked) + span {
+  color: var(--cw-yellow);
+}
+
+.diff-opt input:checked + span {
+  background: var(--cw-yellow);
+  color: var(--ink);
+}
+
+.diff-opt input:focus-visible + span {
+  outline: 3px solid var(--cream);
+  outline-offset: 2px;
+}
+
+.difficulty-note {
+  max-width: 100%;
+  margin: 0;
+  padding: 4px 10px;
+  border-radius: 12px;
+  text-align: center;
+  background: rgba(21, 19, 15, 0.78);
+  color: var(--cream);
+  font: 700 0.72rem/1.2 var(--font-brand);
+}
+
+/* Give button: charity: water logo badge (falls back to a drop icon) */
 .give {
   position: absolute;
   left: var(--gutter-l);
-  top: 47%;
+  top: var(--give-top, 47%);   /* script.js keeps this below the stats and difficulty picker */
   display: flex;
   flex-direction: column;
   align-items: center;
@@ -234,11 +495,12 @@ body {
   transition: opacity 0.3s ease;
 }
 
-.give-icon {
+.give-badge {
   display: grid;
   place-items: center;
   width: 56px;
   height: 56px;
+  overflow: hidden;
   border-radius: 50%;
   background: var(--ink);
   border: 3px solid var(--cw-yellow);
@@ -246,8 +508,32 @@ body {
   transition: transform 0.15s ease;
 }
 
-.give:hover .give-icon {
-  transform: scale(1.07);
+.give-logo {
+  display: none;
+  width: 100%;
+  height: 100%;
+  object-fit: contain;
+}
+
+/* Once the official logo loads, the badge becomes a black tile that matches the logo's black background */
+.give.has-logo .give-badge {
+  width: 104px;
+  height: 80px;
+  padding: 4px;
+  border-radius: 14px;
+  background: #000;
+}
+
+.give.has-logo .give-logo {
+  display: block;
+}
+
+.give.has-logo .give-fallback {
+  display: none;
+}
+
+.give:hover .give-badge {
+  transform: scale(1.05);
 }
 
 .give-label {
@@ -255,7 +541,7 @@ body {
   border-radius: 999px;
   background: var(--ink);
   color: var(--cw-yellow);
-  font: 900 0.68rem/1 var(--font-display);
+  font: 900 0.68rem/1 var(--font-brand);
   text-transform: uppercase;
   letter-spacing: 0.12em;
 }
@@ -287,6 +573,7 @@ body {
   border: 3px solid var(--ink);
   box-shadow: 0 4px 0 var(--ink);
   pointer-events: auto;
+  z-index: 2;
 }
 
 .fact-bubble::after {
@@ -308,14 +595,14 @@ body {
 
 .fact-text {
   margin: 0;
-  font: 700 0.92rem/1.38 var(--font-body);
+  font: 700 0.92rem/1.38 var(--font-brand);
   text-wrap: pretty;
 }
 
 .fact-source {
   margin: 6px 0 0;
-  font: 700 0.68rem/1.2 var(--font-body);
-  letter-spacing: 0.04em;
+  font: 700 0.68rem/1.25 var(--font-brand);
+  letter-spacing: 0.02em;
   color: #6b6252;
 }
 
@@ -333,13 +620,6 @@ body {
   font-size: 1.2rem;
 }
 
-.fine-print {
-  margin: 0;
-  font: 600 0.72rem/1.3 var(--font-body);
-  color: var(--muted);
-  text-align: center;
-}
-
 /* Start Run pressed: UI clears out while the droplet turns around */
 .home.is-leaving .home-top {
   opacity: 0;
@@ -354,6 +634,121 @@ body {
 .home.is-leaving .give,
 .home.is-leaving .fact-bubble {
   opacity: 0;
+}
+
+/* ---------- Checkpoints panel ---------- */
+
+.sheet {
+  justify-content: center;
+  background: rgba(21, 19, 15, 0.6);
+  pointer-events: auto;
+}
+
+.card.sheet-card {
+  display: flex;
+  flex-direction: column;
+  width: min(640px, 100%);
+  max-height: 100%;
+  overflow-y: auto;
+  overscroll-behavior: contain;
+  touch-action: pan-y;
+  text-align: left;
+  padding: 16px 18px 18px;
+}
+
+.sheet-head {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+}
+
+.sheet-head .card-title {
+  margin: 0;
+}
+
+.sheet-card .card-note {
+  margin: 8px 0 14px;
+  max-width: 52ch;
+}
+
+.cp-list {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr);
+  gap: 8px;
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+
+.cp {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  min-width: 0;
+  padding: 8px 12px 8px 8px;
+  border-radius: 14px;
+  background: var(--ink-soft);
+  border: 2px solid transparent;
+}
+
+.cp.is-current {
+  border-color: var(--cw-yellow);
+}
+
+.cp-art {
+  flex: none;
+  width: 64px;
+  height: 76px;
+  border-radius: 10px;
+  /* tiny sky + road behind each droplet */
+  background: linear-gradient(180deg, #8fd0ff 0%, #d9eef3 56%, #5a524b 56%, #2f2a27 100%);
+}
+
+.cp:not(.is-unlocked) .cp-art {
+  opacity: 0.5;
+  filter: saturate(0.35);
+}
+
+.cp-text {
+  min-width: 0;
+}
+
+.cp-num {
+  margin: 0;
+  font: 800 0.62rem/1 var(--font-brand);
+  text-transform: uppercase;
+  letter-spacing: 0.12em;
+  color: var(--muted);
+}
+
+.cp-name {
+  margin: 3px 0 2px;
+  font: italic 900 1.15rem/1.1 var(--font-brand);
+  text-transform: uppercase;
+  color: var(--cw-yellow);
+}
+
+.cp:not(.is-unlocked) .cp-name {
+  color: var(--muted);
+}
+
+.cp-unlock {
+  margin: 0;
+  font: 600 0.8rem/1.3 var(--font-brand);
+  color: var(--cream);
+}
+
+.cp-state {
+  margin: 5px 0 0;
+  font: 800 0.64rem/1.2 var(--font-brand);
+  text-transform: uppercase;
+  letter-spacing: 0.08em;
+  color: var(--water-text);
+}
+
+.cp.is-current .cp-state {
+  color: var(--cw-yellow);
 }
 
 /* ---------- HUD ---------- */
@@ -395,7 +790,7 @@ body {
 }
 
 .hud-label {
-  font: 800 0.6rem/1 var(--font-display);
+  font: 800 0.6rem/1 var(--font-brand);
   text-transform: uppercase;
   letter-spacing: 0.1em;
   color: var(--cw-yellow);
@@ -403,7 +798,7 @@ body {
 }
 
 .hud-value {
-  font: 900 1.45rem/1.05 var(--font-display);
+  font: 900 1.45rem/1.05 var(--font-brand);
   font-variant-numeric: tabular-nums;
   color: var(--cream);
 }
@@ -414,21 +809,6 @@ body {
 
 .hud-stat.pulse {
   animation: hud-pulse 0.3s ease-out;
-}
-
-.icon-btn {
-  grid-column: 3;
-  display: grid;
-  place-items: center;
-  width: 44px;
-  height: 44px;
-  padding: 0;
-  border-radius: 12px;
-  background: var(--ink);
-  border: 2px solid var(--cw-yellow);
-  color: var(--cw-yellow);
-  cursor: pointer;
-  pointer-events: auto;
 }
 
 .hint {
@@ -444,7 +824,7 @@ body {
   background: rgba(21, 19, 15, 0.9);
   border: 2px solid var(--cw-yellow);
   color: var(--cream);
-  font: 700 0.88rem/1.4 var(--font-body);
+  font: 700 0.88rem/1.4 var(--font-brand);
   text-align: center;
   text-wrap: balance;
   pointer-events: none;
@@ -455,6 +835,39 @@ body {
   opacity: 0;
 }
 
+/* Milestone / shield messages during a run */
+.toast {
+  position: absolute;
+  left: 50%;
+  top: calc(var(--safe-t) + 86px);
+  transform: translateX(-50%);
+  width: max-content;
+  max-width: calc(100% - 32px);
+  margin: 0;
+  padding: 8px 14px;
+  border-radius: 12px;
+  border: 2px solid var(--ink);
+  background: var(--cw-yellow);
+  color: var(--ink);
+  box-shadow: 0 4px 0 var(--ink);
+  font: 900 0.92rem/1.3 var(--font-brand);
+  text-align: center;
+  text-wrap: balance;
+  pointer-events: none;
+}
+
+.toast[data-kind="warn"] {
+  background: #ff902a;
+}
+
+.toast[data-kind="info"] {
+  background: var(--cream);
+}
+
+.toast.show {
+  animation: toast 2.8s ease both;
+}
+
 .hint kbd {
   display: inline-block;
   min-width: 1.6em;
@@ -462,10 +875,10 @@ body {
   border-radius: 5px;
   background: var(--cw-yellow);
   color: var(--ink);
-  font: 900 0.78rem/1.4 var(--font-display);
+  font: 900 0.78rem/1.4 var(--font-brand);
 }
 
-/* ---------- Cards (pause + game over) ---------- */
+/* ---------- Cards (pause, checkpoints, game over) ---------- */
 
 .card {
   width: min(360px, 100%);
@@ -486,14 +899,14 @@ body {
 
 .card-title {
   margin: 0 0 6px;
-  font: italic 900 2.2rem/1 var(--font-display);
+  font: italic 900 2.2rem/1 var(--font-brand);
   text-transform: uppercase;
   color: var(--cw-yellow);
 }
 
 .card-note {
   margin: 0 0 16px;
-  font: 600 0.9rem/1.4 var(--font-body);
+  font: 600 0.9rem/1.4 var(--font-brand);
   color: var(--muted);
 }
 
@@ -503,14 +916,18 @@ body {
 
 .over-title {
   margin: 0 0 12px;
-  font: italic 900 clamp(2.2rem, 9vw, 2.9rem)/1 var(--font-display);
+  font: italic 900 clamp(2.2rem, 9vw, 2.9rem)/1 var(--font-brand);
   text-transform: uppercase;
   color: var(--cw-yellow);
 }
 
 .over-label {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 6px;
   margin: 0;
-  font: 800 0.7rem/1 var(--font-display);
+  font: 800 0.7rem/1 var(--font-brand);
   text-transform: uppercase;
   letter-spacing: 0.12em;
   color: var(--cw-yellow);
@@ -518,28 +935,49 @@ body {
 
 .over-score {
   margin: 4px 0 0;
-  font: 900 3.2rem/1 var(--font-display);
+  font: 900 3.2rem/1 var(--font-brand);
   font-variant-numeric: tabular-nums;
   color: var(--cream);
 }
 
+.badges {
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: center;
+  gap: 6px;
+  margin-top: 10px;
+}
+
 .badge {
-  display: inline-block;
-  margin: 10px 0 0;
+  margin: 0;
   padding: 5px 12px;
   border-radius: 999px;
   background: var(--cw-yellow);
   color: var(--ink);
-  font: 900 0.72rem/1 var(--font-display);
+  font: 900 0.72rem/1 var(--font-brand);
   text-transform: uppercase;
-  letter-spacing: 0.1em;
+  letter-spacing: 0.08em;
+}
+
+.badge--level {
+  background: var(--water-text);
 }
 
 .over-note {
   margin: 12px 0 0;
-  font: 600 0.9rem/1.4 var(--font-body);
+  font: 600 0.9rem/1.4 var(--font-brand);
   color: var(--muted);
   text-wrap: balance;
+}
+
+.over-progress {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+  margin-top: 14px;
+  padding-top: 12px;
+  border-top: 1px solid var(--line);
+  text-align: left;
 }
 
 .over-actions {
@@ -575,33 +1013,94 @@ body {
   to { opacity: 1; }
 }
 
+@keyframes toast {
+  0% { opacity: 0; transform: translate(-50%, -12px) scale(0.9); }
+  8% { opacity: 1; transform: translate(-50%, 0) scale(1); }
+  85% { opacity: 1; transform: translate(-50%, 0) scale(1); }
+  100% { opacity: 0; transform: translate(-50%, 0) scale(1); }
+}
+
 /* ---------- Size adjustments ---------- */
+
+/* Two columns of checkpoints when there's room */
+@media (min-width: 600px) {
+  .cp-list {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+}
 
 /* Bigger screens: roomier signage */
 @media (min-width: 900px) and (min-height: 700px) {
   .stat { padding: 9px 20px; }
-  .stat dd { font-size: 1.3rem; }
-  .stat--progress { min-width: 300px; }
-  .stat--high { min-width: 260px; }
-  .stat--last { min-width: 224px; }
+  .stat-value { font-size: 1.3rem; }
+  .stat--progress { min-width: 320px; padding: 10px 20px 9px; }
+  .stat--high { min-width: 264px; }
+  .stat--last { min-width: 220px; }
   .hud-stat { flex-basis: 160px; }
   .hud-value { font-size: 1.75rem; }
   .give { left: max(32px, 8vw); }
+  .give.has-logo .give-badge { width: 120px; height: 92px; }
+  .cw-links { gap: 4px 24px; }
+  .cw-links a { font-size: 0.95rem; }
+  .cw-disclaimer { font-size: 0.78rem; }
 }
 
-/* Short screens (phones held sideways): put the stats in a row */
+/* Wide screens that aren't very tall: drop the small eyebrow to make room */
+@media (max-height: 860px) and (min-aspect-ratio: 1/1) {
+  .eyebrow { display: none; }
+}
+
+/* Short screens (phones held sideways): stats in a row, tighter spacing */
 @media (max-height: 560px) {
   .home-top { gap: 6px; }
-  .eyebrow { display: none; }
   .title { font-size: 2.2rem; box-shadow: 0 4px 0 var(--cw-yellow); }
-  .stats { flex-direction: row; flex-wrap: wrap; justify-content: center; margin-top: 4px; }
-  .stat--progress,
+  .stats { flex-direction: row; flex-wrap: wrap; justify-content: center; align-items: center; margin-top: 4px; }
+  .stat--progress { min-width: 0; width: 250px; padding: 6px 12px; gap: 4px; }
   .stat--high,
   .stat--last { min-width: 0; padding: 5px 12px; }
+  .diff-opt span { padding: 8px 14px; }
+  .difficulty { margin-top: 0; }
+  .difficulty-note { display: none; }
   .btn--start { min-height: 44px; padding: 12px 22px; }
-  .fine-print { display: none; }
+  .screen.home,
+  .screen.over { padding-bottom: calc(var(--footer-h, 44px) + 10px); }
+  .cw-footer { padding-block: 4px calc(var(--safe-b) + 4px); }
+  .cw-footer .icon-btn { width: 34px; height: 34px; }
+  /* Game over: card on the left, buttons stacked on the right */
+  .over { flex-direction: row; justify-content: center; align-items: center; gap: 16px; }
+  .over-note { display: none; }
+  .over-actions { flex-direction: column; width: 200px; }
+  .over-actions .btn { flex: none; }
+  .toast { top: calc(var(--safe-t) + 74px); font-size: 0.82rem; padding: 6px 12px; }
+  .give.has-logo .give-badge { width: 92px; height: 70px; }
   .over-score { font-size: 2.4rem; }
+  .over-title { margin-bottom: 6px; }
+  .over-note { margin-top: 6px; }
+  .over-progress { margin-top: 8px; padding-top: 8px; }
   .card { padding: 12px 18px 14px; }
+}
+
+/* Phones */
+@media (max-width: 500px) {
+  .give.has-logo .give-badge { width: 96px; height: 74px; }
+}
+
+/* Short phones held upright (e.g. iPhone SE): tighter top and bottom */
+@media (max-height: 700px) and (max-aspect-ratio: 1/1) {
+  .eyebrow { display: none; }
+  .btn--start { min-height: 46px; padding: 12px 22px; }
+  .cw-footer { padding-block: 6px calc(var(--safe-b) + 6px); }
+  .cw-footer .icon-btn { width: 40px; height: 40px; }
+}
+
+/* Very narrow phones */
+@media (max-width: 360px) {
+  .stat--progress { min-width: 250px; }
+  .hud-value { font-size: 1.25rem; }
+  .give.has-logo .give-badge { width: 84px; height: 64px; padding: 3px; }
+  .cw-links { gap: 2px 12px; }
+  .cw-links a { font-size: 0.74rem; }
+  .cw-disclaimer { font-size: 0.64rem; }
 }
 
 /* Phones: the fact bubble needs the space the Give button sits in */
@@ -612,18 +1111,16 @@ body {
   }
 }
 
-/* Very narrow phones */
-@media (max-width: 360px) {
-  .stat--progress { min-width: 230px; }
-  .hud-value { font-size: 1.25rem; }
-  .give { top: 50%; }
-}
-
 @media (prefers-reduced-motion: reduce) {
   *,
   *::before,
   *::after {
     animation-duration: 0.01ms !important;
     transition-duration: 0.01ms !important;
+  }
+
+  /* keep messages on screen instead of fading them */
+  .toast.show {
+    animation: none;
   }
 }
